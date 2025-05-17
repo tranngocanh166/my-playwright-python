@@ -6,42 +6,45 @@ pipeline {
     }
  
     stages {
-        stage('Clone Source Code') {
+        stage('Clone Code') {
             steps {
                 git 'https://github.com/tranngocanh166/my-playwright-python.git'
             }
         }
  
-        stage('Setup Python venv') {
+        stage('Create Virtual Env') {
             steps {
                 bat 'python -m venv %VENV_DIR%'
-                bat '%VENV_DIR%\\Scripts\\activate && pip install --upgrade pip'
             }
         }
  
         stage('Install Dependencies') {
             steps {
-                bat '%VENV_DIR%\\Scripts\\activate && pip install -r requirements.txt'
-                bat '%VENV_DIR%\\Scripts\\activate && playwright install'
+                bat '''
+                    call %VENV_DIR%\\Scripts\\activate.bat
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    playwright install
+                '''
             }
         }
  
-        stage('Run Playwright Tests') {
+        stage('Run Tests') {
             steps {
-                bat '%VENV_DIR%\\Scripts\\activate && pytest tests/ --headed'
+                bat '''
+                    call %VENV_DIR%\\Scripts\\activate.bat
+                    pytest tests/ --headed
+                '''
             }
         }
     }
  
     post {
-        always {
-            echo "🎯 Build finished."
-        }
         success {
-            echo "✅ Tests ran successfully."
+            echo "✅ Playwright tests completed successfully!"
         }
         failure {
-            echo "❌ Test run failed."
+            echo "❌ Playwright tests failed!"
         }
     }
 }
