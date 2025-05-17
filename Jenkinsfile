@@ -1,35 +1,33 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    VENV_DIR = 'venv'
-  }
+    stages {
+        stage('Setup Python & Dependencies') {
+            steps {
+                sh '''
+                python3 -m venv venv
+                source venv/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                python -m playwright install
+                '''
+            }
+        }
 
-  stages {
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/tranngocanh166/my-playwright-python.git'
-      }
+        stage('Run Playwright Tests') {
+            steps {
+                sh '''
+                source venv/bin/activate
+                pytest my-playwright-python/tests
+                '''
+            }
+        }
     }
 
-    stage('Set up Virtual Environment') {
-      steps {
-        sh 'python -m venv $VENV_DIR'
-        sh '. $VENV_DIR/bin/activate && pip install --upgrade pip && pip install -r requirements.txt'
-        sh '. $VENV_DIR/bin/activate && playwright install'
-      }
+    post {
+        always {
+            archiveArtifacts artifacts: '**/videos/**', allowEmptyArchive: true
+            archiveArtifacts artifacts: '**/trace.zip', allowEmptyArchive: true
+        }
     }
-
-    stage('Run Playwright Tests') {
-      steps {
-        sh '. $VENV_DIR/bin/activate && pytest tests/ --headed --tracing=retain-on-failure --video=on'
-      }
-    }
-
-    stage('Archive Traces and Videos') {
-      steps {
-        archiveArtifacts artifacts: '**/test-results/**/*.*', allowEmptyArchive: true
-      }
-    }
-  }
 }
