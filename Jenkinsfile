@@ -33,7 +33,7 @@ pipeline {
             steps {
                 bat '''
                     call %VENV_DIR%\\Scripts\\activate.bat
-                    pytest tests/ --headed
+                    pytest tests
                 '''
             }
         }
