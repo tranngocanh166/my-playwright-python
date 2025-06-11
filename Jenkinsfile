@@ -44,7 +44,7 @@ pipeline {
             echo "✅ Playwright tests completed successfully!"
         }
         failure {
-            echo "❌ Playwright tests failed!"
+            echo "❌ Playwright tests failed!123"
         }
     }
 }
